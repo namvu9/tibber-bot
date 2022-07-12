@@ -27,10 +27,6 @@ const createExecutionStore = (db) => {
       const result = await db.query(getRecordQuery(DB_TABLE_NAME, id));
       return result.rows[0];
     },
-
-    getAll: async () => {
-      return await db.query(`SELECT * FROM executions;`);
-    },
   };
 };
 

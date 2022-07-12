@@ -1,21 +1,15 @@
-const {
-  createExecutionState,
-  countUniqueNodes,
-  reduceState,
-} = require("./command");
+const { applyCommands } = require("./reducer");
 const { createExecutionRecord } = require("./db");
-const { performance } = require("perf_hooks");
-
-const SECOND = 1000;
+const { timed } = require("./time");
+const { countUniqueNodes } = require("./result");
 
 const executeCmdHandler = (executionStore) => async (req, res) => {
   const { start, commands } = req.body;
 
-  const startTime = performance.now();
-  const finalState = reduceState(createExecutionState(start), commands);
-  const result = countUniqueNodes(finalState);
-  const endTime = performance.now();
-  const duration = (endTime - startTime) / SECOND;
+  const [duration, result] = timed(() => {
+    const finalState = applyCommands(start, commands);
+    return countUniqueNodes(finalState);
+  });
 
   const executionRecord = createExecutionRecord(
     commands.length,
@@ -25,6 +19,7 @@ const executeCmdHandler = (executionStore) => async (req, res) => {
 
   const recordId = await executionStore.put(executionRecord);
   const record = await executionStore.get(recordId);
+
   res.json(record);
 };
 

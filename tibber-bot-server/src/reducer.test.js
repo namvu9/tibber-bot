@@ -1,10 +1,4 @@
-const {
-  createExecutionState,
-  getScore,
-  insertSegment,
-  reduceState,
-  countUniqueNodes,
-} = require("./command");
+const { countVisitedNodes, storeSegment, applyCommands } = require("./reducer");
 
 describe("applyCommands", () => {
   // 8
@@ -20,8 +14,7 @@ describe("applyCommands", () => {
       { direction: "north", steps: 2 },
     ];
 
-    const initialState = createExecutionState(start);
-    const res = reduceState(initialState, commands);
+    const res = applyCommands(start, commands);
     const exp = {
       hSum: 6,
       vSum: 6,
@@ -46,8 +39,7 @@ describe("applyCommands", () => {
       { direction: "north", steps: 2 },
     ];
 
-    const initialState = createExecutionState(start);
-    const finalState = reduceState(initialState, commands);
+    const finalState = applyCommands(start, commands);
     const expectedFinalState = {
       hSum: 6,
       vSum: 6,
@@ -75,8 +67,7 @@ describe("applyCommands", () => {
       { direction: "west", steps: 4 },
     ];
 
-    const initialState = createExecutionState(start);
-    const res = reduceState(initialState, commands);
+    const res = applyCommands(start, commands);
     const expectedFinalState = {
       hSum: 20,
       vSum: 6,
@@ -111,8 +102,7 @@ describe("applyCommands", () => {
       { direction: "north", steps: 4 },
     ];
 
-    const initialState = createExecutionState(start);
-    const res = reduceState(initialState, commands);
+    const res = applyCommands(start, commands);
     const expectedFinalState = {
       hSum: 6,
       vSum: 20,
@@ -131,76 +121,13 @@ describe("applyCommands", () => {
   });
 });
 
-describe("countUniqueNodes", () => {
-  // 8
-  // +  +  +
-  // +     +
-  // +  +  +
-  it("should work", () => {
-    const finalState = {
-      hSum: 6,
-      vSum: 6,
-      hSegments: { 0: [[0, 2]], 2: [[0, 2]] },
-      vSegments: { 0: [[0, 2]], 2: [[0, 2]] },
-      position: { x: 0, y: 0 },
-    };
-
-    expect(countUniqueNodes(finalState)).toEqual(8);
-  });
-
-  // > > > > v
-  // v < < < <
-  // > > > > v
-  // + < < < <
-  it("should handle horizontal zig-zag pattern", () => {
-    const finalState = {
-      hSum: 20,
-      vSum: 6,
-      hSegments: { 0: [[0, 4]], 1: [[0, 4]], 2: [[0, 4]], 3: [[0, 4]] },
-      vSegments: {
-        0: [[1, 2]],
-        4: [
-          [0, 1],
-          [2, 3],
-        ],
-      },
-      position: { x: 0, y: 3 },
-    };
-
-    expect(countUniqueNodes(finalState)).toEqual(20);
-  });
-
-  // v > v +
-  // v ^ v ^
-  // v ^ v ^
-  // v ^ v ^
-  // > ^ > ^
-  it("should handle vertical zig-zag pattern", () => {
-    const finalState = {
-      hSum: 6,
-      vSum: 20,
-      vSegments: { 0: [[0, 4]], 1: [[0, 4]], 2: [[0, 4]], 3: [[0, 4]] },
-      hSegments: {
-        0: [[1, 2]],
-        4: [
-          [0, 1],
-          [2, 3],
-        ],
-      },
-      position: { x: 3, y: 0 },
-    };
-
-    expect(countUniqueNodes(finalState)).toEqual(20);
-  });
-});
-
 describe("getScore", () => {
   it("should handle single node segment", () => {
-    expect(getScore([0, 0])).toEqual(1);
+    expect(countVisitedNodes([0, 0])).toEqual(1);
   });
 
   it("should handle segments", () => {
-    expect(getScore([-1, 2])).toEqual(4);
+    expect(countVisitedNodes([-1, 2])).toEqual(4);
   });
 });
 
@@ -214,7 +141,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 1,
       hSegments: { 0: [[start.x, end.x]] },
 
@@ -231,7 +158,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 4,
       hSegments: { 0: [[start.x, end.x]] },
       vSegments: {},
@@ -250,7 +177,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 6,
       hSegments: {
         0: [
@@ -274,7 +201,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 6,
       hSegments: {
         0: [[1, 3]],
@@ -297,7 +224,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 9,
       hSegments: {
         0: [[1, 3]],
@@ -322,7 +249,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 5,
       hSegments: {
         0: [
@@ -346,7 +273,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 5,
       hSegments: {
         0: [[-1, 3]],
@@ -367,7 +294,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 4,
       hSegments: {
         0: [[1, 4]],
@@ -391,7 +318,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSum: 6,
       hSegments: {
         0: [[1, 6]],
@@ -409,7 +336,7 @@ describe("insertSegment", () => {
       vSegments: {},
     };
 
-    expect(insertSegment(segment, state)).toEqual({
+    expect(storeSegment(segment, state)).toEqual({
       hSegments: {},
       vSegments: { 0: [[start.y, end.y]] },
       vSum: 3,
