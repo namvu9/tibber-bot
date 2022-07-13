@@ -8,19 +8,18 @@ const { executeCmdHandler } = require("./src/handlers");
 const PORT = 5000;
 
 const main = async () => {
-  // Deps
-  const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB } = process.env;
+  const { POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_HOST } =
+    process.env;
 
+  // Deps
   const pgClient = new Client({
-    host: "postgres",
+    host: POSTGRES_HOST || "postgres",
     user: POSTGRES_USER,
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DB,
   });
 
   await pgClient.connect();
-  const executionStore = createExecutionStore(pgClient);
-
   const app = express();
 
   // Middleware here
@@ -29,7 +28,7 @@ const main = async () => {
   // Endpoints
   app.post(
     "/tibber-developer-test/enter-path",
-    executeCmdHandler(executionStore)
+    executeCmdHandler(createExecutionStore(pgClient))
   );
 
   app.listen(PORT, () => {
