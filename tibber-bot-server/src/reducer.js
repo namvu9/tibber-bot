@@ -55,7 +55,6 @@ const storeSegment = (segment, state) =>
     ? storeHorizontalSegment(segment, state)
     : storeVerticalSegment(segment, state);
 
-// TODO: Clean up
 const storeHorizontalSegment = (segment, state) => {
   const [start] = segment;
   const row = state.hSegments[start.y];
@@ -76,7 +75,6 @@ const storeHorizontalSegment = (segment, state) => {
   };
 };
 
-// TODO: Clean up
 const storeVerticalSegment = (segment, state) => {
   const [start] = segment;
   const [vSum, newCol] = insertSegment(
@@ -95,18 +93,18 @@ const storeVerticalSegment = (segment, state) => {
   };
 };
 
-const insertSegment = (newSegment, segments = [], initialScore = 0) =>
+const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
   !segments.length
-    ? [initialScore + magnitudeOf(newSegment), [newSegment]]
+    ? [initialNodeCount + magnitudeOf(newSegment), [newSegment]]
     : segments.reduce(
-        ([sum, rowAcc], segment, index) => {
+        ([nodeCount, rowAcc], segment, index) => {
           if (isOverlapping(newSegment, segment)) {
             const mergedSegment = mergeSegments(newSegment, segment);
             const prevSegment = last(rowAcc);
 
             if (!isOverlapping(prevSegment, mergedSegment)) {
               return [
-                sum + magnitudeOf(mergedSegment) - magnitudeOf(segment),
+                nodeCount + magnitudeOf(mergedSegment) - magnitudeOf(segment),
                 append(mergedSegment, rowAcc),
               ];
             }
@@ -117,7 +115,7 @@ const insertSegment = (newSegment, segments = [], initialScore = 0) =>
             );
 
             return [
-              sum -
+              nodeCount -
                 magnitudeOf(prevSegment) -
                 magnitudeOf(segment) +
                 magnitudeOf(twiceMergedSegment),
@@ -127,21 +125,21 @@ const insertSegment = (newSegment, segments = [], initialScore = 0) =>
 
           if (startsBefore(newSegment, segment)) {
             return [
-              sum + magnitudeOf(newSegment),
+              nodeCount + magnitudeOf(newSegment),
               concat(rowAcc, [newSegment, segment]),
             ];
           }
 
           if (index === segments.length - 1) {
             return [
-              sum + magnitudeOf(newSegment),
+              nodeCount + magnitudeOf(newSegment),
               concat(rowAcc, [segment, newSegment]),
             ];
           }
 
-          return [sum + magnitudeOf(segment), append(segment, rowAcc)];
+          return [nodeCount + magnitudeOf(segment), append(segment, rowAcc)];
         },
-        [initialScore, []]
+        [initialNodeCount, []]
       );
 
 const calculatePosition = (currentPos, command) => {
