@@ -13,7 +13,7 @@ const main = async () => {
 
   // Deps
   const pgClient = new Client({
-    host: POSTGRES_HOST || "postgres",
+    host: POSTGRES_HOST,
     user: POSTGRES_USER,
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DB,
