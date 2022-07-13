@@ -23,12 +23,13 @@ const createExecutionState = (start) => ({
 });
 
 const reduceState = (state, command) => {
-  const segment = [state.position, calculatePosition(state.position, command)];
+  const newPosition = calculatePosition(state.position, command);
+  const segment = [state.position, newPosition];
   const newState = storeSegment(segment, state);
 
   return {
     ...newState,
-    position: last(segment),
+    position: newPosition,
   };
 };
 
@@ -123,24 +124,23 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
             ];
           }
 
-          if (startsBefore(newSegment, segment)) {
-            return [
-              nodeCount + magnitudeOf(newSegment),
-              concat(rowAcc, [newSegment, segment]),
-            ];
-          }
-
-          if (index === segments.length - 1) {
-            return [
-              nodeCount + magnitudeOf(newSegment),
-              concat(rowAcc, [segment, newSegment]),
-            ];
-          }
-
-          return [nodeCount + magnitudeOf(segment), append(segment, rowAcc)];
+          // no overlap
+          return startsBefore(newSegment, segment)
+            ? [
+                nodeCount + magnitudeOf(newSegment),
+                concat(rowAcc, [newSegment, segment]),
+              ]
+            : isLastElement(index, segments)
+            ? [
+                nodeCount + magnitudeOf(newSegment),
+                concat(rowAcc, [segment, newSegment]),
+              ]
+            : [nodeCount + magnitudeOf(segment), append(segment, rowAcc)];
         },
         [initialNodeCount, []]
       );
+
+const isLastElement = (index, arr) => index === arr.length - 1;
 
 const calculatePosition = (currentPos, command) => {
   const { x, y } = currentPos;

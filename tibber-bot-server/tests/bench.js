@@ -2,6 +2,8 @@ const { executeCmdHandler } = require("../src/handlers");
 const { calculatePosition } = require("../src/reducer");
 const { timed } = require("../src/time");
 
+const MAX_STEPS = 100000;
+
 const getRandomDirection = () => {
   const directions = ["north", "south", "west", "east"];
   const idx = Math.floor(Math.random() * 4);
@@ -30,10 +32,6 @@ const res = { json: () => {} };
 const start = { x: 0, y: 0 };
 
 const handler = executeCmdHandler(executionStoreMock);
-const maxSteps = [
-  //1, 50, 100, 200, 500, 1000, 5000, 10000, 15000, 30000,
-  100000,
-];
 const nCommands = [
   1, 50, 100, 500, 510, 600, 700, 800, 900, 1000, 5000, 6000, 7000, 8000, 9000,
   10000, 15000, 20000,
@@ -77,29 +75,20 @@ const naiveSolution = (start, commands) => {
 const locationKey = (position) => `${position.x}X${position.y}Y`;
 
 nCommands.forEach((nCmd) => {
-  maxSteps.forEach((max) => {
-    const commands = generateTestCommands(max, nCmd);
-    const req = {
-      body: {
-        start,
-        commands,
-      },
-    };
+  const commands = generateTestCommands(MAX_STEPS, nCmd);
+  const req = {
+    body: {
+      start,
+      commands,
+    },
+  };
 
-    const [duration] = timed(async () => {
-      // Run either the real implementation or the naive
-      // solution
-      await handler(req, res);
-      //naiveSolution(start, commands);
-    });
-
-    console.log(
-      "COMMANDS:",
-      nCmd,
-      "\t\tMAX STEPS:",
-      max,
-      "\t\tDURATION (s):",
-      duration
-    );
+  const [duration] = timed(async () => {
+    // Run either the real implementation or the naive
+    // solution
+    await handler(req, res);
+    //naiveSolution(start, commands);
   });
+
+  console.log("COMMANDS:", nCmd, "\t\tDURATION (s):", duration);
 });

@@ -41,7 +41,6 @@ const toSegmentsIndexed = pipe(
   unnest
 );
 
-// TODO: MOVE
 const isOverlapping = (segA, segB) => {
   if (!segA || !segB) {
     return false;
