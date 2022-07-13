@@ -51,62 +51,67 @@ const reduceState = (state, command) => {
 const applyCommands = (start, commands) =>
   reduce(reduceState, createExecutionState(start), commands);
 
-const storeSegment = (segment, state) =>
-  isHorizontalSegment(segment)
-    ? storeHorizontalSegment(segment, state)
-    : storeVerticalSegment(segment, state);
-
-const storeHorizontalSegment = (segment, state) => {
+const getIndexedSegmentVector = (segment, state) => {
   const [start] = segment;
-  const row = state.hSegments[start.y];
+  return isHorizontalSegment(segment)
+    ? [start.y, state.hSegments[start.y]]
+    : [start.x, state.vSegments[start.x]];
+};
 
-  const [hSum, newRow] = insertSegment(
+const getDirectionalState = (isHorizontal, state) =>
+  isHorizontal
+    ? {
+        sum: state.hSum,
+        sumKey: "hSum",
+
+        vectors: state.hSegments,
+        vectorsKey: "hSegments",
+      }
+    : {
+        sum: state.vSum,
+        sumKey: "vSum",
+
+        vectors: state.vSegments,
+        vectorsKey: "vSegments",
+      };
+
+const storeSegment = (segment, state) => {
+  const isHorizontal = isHorizontalSegment(segment);
+  const { sum, sumKey, vectors, vectorsKey } = getDirectionalState(
+    isHorizontal,
+    state
+  );
+  const [index, segmentVector] = getIndexedSegmentVector(segment, state);
+
+  const [newSum, newVector] = insertSegment(
     normalizeSegment(segment),
-    row,
-    state.hSum
+    segmentVector,
+    sum
   );
 
   return {
     ...state,
-    hSum,
-    hSegments: {
-      ...state.hSegments,
-      [start.y]: newRow,
+    [sumKey]: newSum,
+    [vectorsKey]: {
+      ...vectors,
+      [index]: newVector,
     },
   };
 };
 
-const storeVerticalSegment = (segment, state) => {
-  const [start] = segment;
-  const [vSum, newCol] = insertSegment(
-    normalizeSegment(segment),
-    state.vSegments[start.x],
-    state.vSum
-  );
-
-  return {
-    ...state,
-    vSegments: {
-      ...state.vSegments,
-      [start.x]: newCol,
-    },
-    vSum,
-  };
-};
-
-const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
-  !segments.length
+const insertSegment = (newSegment, vector = [], initialNodeCount = 0) =>
+  !vector.length
     ? [initialNodeCount + magnitude(newSegment), [newSegment]]
-    : segments.reduce(
-        ([nodeCount, rowAcc], segment, index) => {
+    : vector.reduce(
+        ([nodeCount, vectorAcc], segment, index) => {
           if (isOverlapping(newSegment, segment)) {
             const mergedSegment = mergeSegments(newSegment, segment);
-            const prevSegment = last(rowAcc);
+            const prevSegment = last(vectorAcc);
 
             if (!isOverlapping(prevSegment, mergedSegment)) {
               return [
                 nodeCount + magnitude(mergedSegment) - magnitude(segment),
-                append(mergedSegment, rowAcc),
+                append(mergedSegment, vectorAcc),
               ];
             }
 
@@ -120,7 +125,7 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
                 magnitude(prevSegment) -
                 magnitude(segment) +
                 magnitude(twiceMergedSegment),
-              append(twiceMergedSegment, init(rowAcc)),
+              append(twiceMergedSegment, init(vectorAcc)),
             ];
           }
 
@@ -128,14 +133,14 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
           return startsBefore(newSegment, segment)
             ? [
                 nodeCount + magnitude(newSegment),
-                concat(rowAcc, [newSegment, segment]),
+                concat(vectorAcc, [newSegment, segment]),
               ]
-            : isLastElement(index, segments)
+            : isLastElement(index, vector)
             ? [
                 nodeCount + magnitude(newSegment),
-                concat(rowAcc, [segment, newSegment]),
+                concat(vectorAcc, [segment, newSegment]),
               ]
-            : [nodeCount + magnitude(segment), append(segment, rowAcc)];
+            : [nodeCount + magnitude(segment), append(segment, vectorAcc)];
         },
         [initialNodeCount, []]
       );
