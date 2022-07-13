@@ -1,12 +1,12 @@
+const { reduce, append, init, concat, last } = require("ramda");
 const {
-  reduce,
-  eqProps,
-  append,
-  ifElse,
-  init,
-  concat,
-  last,
-} = require("ramda");
+  isHorizontalSegment,
+  normalizeSegment,
+  magnitudeOf,
+  isOverlapping,
+  mergeSegments,
+  startsBefore,
+} = require("./segment");
 
 // Directions
 const NORTH = "north";
@@ -23,18 +23,13 @@ const createExecutionState = (start) => ({
 });
 
 const reduceState = (state, command) => {
-  const segment = createSegment(state, command);
+  const segment = [state.position, calculatePosition(state.position, command)];
   const newState = storeSegment(segment, state);
 
   return {
     ...newState,
     position: last(segment),
   };
-};
-
-const createSegment = (state, command) => {
-  const { position } = state;
-  return [position, calculatePosition(position, command)];
 };
 
 // The algorithm can roughly be outlined as follows:
@@ -54,14 +49,6 @@ const createSegment = (state, command) => {
 // nodes visited
 const applyCommands = (start, commands) =>
   reduce(reduceState, createExecutionState(start), commands);
-
-// This function expect the segment to be arranged such that
-// start <= end
-const countVisitedNodes = (segment) => {
-  if (!segment) return 0;
-  const [start, end] = segment;
-  return end - start + 1;
-};
 
 const storeSegment = (segment, state) =>
   isHorizontalSegment(segment)
@@ -110,9 +97,8 @@ const storeVerticalSegment = (segment, state) => {
 
 const insertSegment = (newSegment, segments = [], initialScore = 0) =>
   !segments.length
-    ? [initialScore + countVisitedNodes(newSegment), [newSegment]]
-    : // TODO: Clean up
-      segments.reduce(
+    ? [initialScore + magnitudeOf(newSegment), [newSegment]]
+    : segments.reduce(
         ([sum, rowAcc], segment, index) => {
           if (isOverlapping(newSegment, segment)) {
             const mergedSegment = mergeSegments(newSegment, segment);
@@ -120,9 +106,7 @@ const insertSegment = (newSegment, segments = [], initialScore = 0) =>
 
             if (!isOverlapping(prevSegment, mergedSegment)) {
               return [
-                sum +
-                  countVisitedNodes(mergedSegment) -
-                  countVisitedNodes(segment),
+                sum + magnitudeOf(mergedSegment) - magnitudeOf(segment),
                 append(mergedSegment, rowAcc),
               ];
             }
@@ -134,71 +118,31 @@ const insertSegment = (newSegment, segments = [], initialScore = 0) =>
 
             return [
               sum -
-                countVisitedNodes(prevSegment) -
-                countVisitedNodes(segment) +
-                countVisitedNodes(twiceMergedSegment),
+                magnitudeOf(prevSegment) -
+                magnitudeOf(segment) +
+                magnitudeOf(twiceMergedSegment),
               append(twiceMergedSegment, init(rowAcc)),
             ];
           }
 
           if (startsBefore(newSegment, segment)) {
             return [
-              sum + countVisitedNodes(segment),
+              sum + magnitudeOf(newSegment),
               concat(rowAcc, [newSegment, segment]),
             ];
           }
 
           if (index === segments.length - 1) {
             return [
-              sum + countVisitedNodes(newSegment),
+              sum + magnitudeOf(newSegment),
               concat(rowAcc, [segment, newSegment]),
             ];
           }
 
-          return [sum + countVisitedNodes(segment), append(segment, rowAcc)];
+          return [sum + magnitudeOf(segment), append(segment, rowAcc)];
         },
         [initialScore, []]
       );
-
-const isOverlapping = (segA, segB) => {
-  if (!segA || !segB) {
-    return false;
-  }
-
-  const [startA, endA] = segA;
-  const [startB, endB] = segB;
-
-  if (startA >= startB && startA <= endB) {
-    return true;
-  }
-
-  if (endA <= endB && endA >= startB) {
-    return true;
-  }
-
-  return false;
-};
-
-const isHorizontalSegment = ([start, end]) => eqProps("y", start, end);
-
-const normalizeHorizontalSegment = ([start, end]) =>
-  start.x <= end.x ? [start.x, end.x] : [end.x, start.x];
-
-const normalizeVerticalSegment = ([start, end]) =>
-  start.y <= end.y ? [start.y, end.y] : [end.y, start.y];
-
-const normalizeSegment = ifElse(
-  isHorizontalSegment,
-  normalizeHorizontalSegment,
-  normalizeVerticalSegment
-);
-
-const startsBefore = ([, endA], [startB]) => endA < startB;
-
-const mergeSegments = ([startA, endA], [startB, endB]) => [
-  startA < startB ? startA : startB,
-  endA > endB ? endA : endB,
-];
 
 const calculatePosition = (currentPos, command) => {
   const { x, y } = currentPos;
@@ -220,9 +164,6 @@ const calculatePosition = (currentPos, command) => {
 
 module.exports = {
   applyCommands,
-  countVisitedNodes,
   storeSegment,
   calculatePosition,
-  createSegment,
-  normalizeSegment,
 };

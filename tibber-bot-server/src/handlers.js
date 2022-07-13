@@ -1,7 +1,7 @@
 const { applyCommands } = require("./reducer");
 const { createExecutionRecord } = require("./db");
 const { timed } = require("./time");
-const { countUniqueNodes } = require("./result");
+const { magnitudeOf, countUniqueNodes } = require("./segment");
 
 const executeCmdHandler = (executionStore) => async (req, res) => {
   const { start, commands } = req.body;
