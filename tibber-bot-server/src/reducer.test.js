@@ -1,4 +1,4 @@
-const { magnitudeOf, storeSegment, applyCommands } = require("./reducer");
+const { storeSegment, applyCommands } = require("./reducer");
 
 describe("applyCommands", () => {
   it("should handle horizontal movement", () => {
