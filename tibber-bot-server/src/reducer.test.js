@@ -1,7 +1,25 @@
-const { countVisitedNodes, storeSegment, applyCommands } = require("./reducer");
+const { magnitudeOf, storeSegment, applyCommands } = require("./reducer");
 
 describe("applyCommands", () => {
-  // 8
+  it("should handle horizontal movement", () => {
+    const start = { x: 0, y: 0 };
+    const commands = [
+      { direction: "east", steps: 2 },
+      { direction: "east", steps: 2 },
+    ];
+
+    const res = applyCommands(start, commands);
+    const exp = {
+      hSum: 5,
+      vSum: 0,
+      hSegments: { 0: [[0, 4]] },
+      vSegments: {},
+      position: { x: 4, y: 0 },
+    };
+
+    expect(res).toEqual(exp);
+  });
+
   // +  +  +
   // +     +
   // +  +  +
@@ -119,15 +137,45 @@ describe("applyCommands", () => {
 
     expect(res).toEqual(expectedFinalState);
   });
-});
 
-describe("getScore", () => {
-  it("should handle single node segment", () => {
-    expect(countVisitedNodes([0, 0])).toEqual(1);
-  });
+  // v < v < <
+  // v ^ v   ^
+  // v ^ v   ^
+  // v ^ v   ^
+  // + ^ <   ^
+  it("should handle vertical zig-zag pattern (west from bottom right)", () => {
+    const start = { x: 0, y: 0 };
+    const commands = [
+      { direction: "north", steps: 4 },
+      { direction: "west", steps: 2 },
+      { direction: "south", steps: 4 },
+      { direction: "west", steps: 1 },
+      { direction: "north", steps: 4 },
+      { direction: "west", steps: 1 },
+      { direction: "south", steps: 4 },
+    ];
 
-  it("should handle segments", () => {
-    expect(countVisitedNodes([-1, 2])).toEqual(4);
+    const res = applyCommands(start, commands);
+    const expectedFinalState = {
+      hSum: 7,
+      vSum: 20,
+      vSegments: {
+        "-4": [[-4, 0]],
+        "-3": [[-4, 0]],
+        "-2": [[-4, 0]],
+        0: [[-4, 0]],
+      },
+      hSegments: {
+        0: [[-3, -2]],
+        "-4": [
+          [-4, -3],
+          [-2, 0],
+        ],
+      },
+      position: { x: -4, y: 0 },
+    };
+
+    expect(res).toEqual(expectedFinalState);
   });
 });
 
