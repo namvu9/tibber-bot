@@ -3,7 +3,6 @@ const {
   mapObjIndexed,
   values,
   unnest,
-  curry,
   sortBy,
   prop,
   eqProps,
@@ -31,11 +30,11 @@ const countOverlapsWith =
     ).length;
 
 const within = (val, start, end) => start <= val && end >= val;
-const withinSegment = curry(([start, end], val) => within(val, start, end));
+const withinSegment = ([start, end], val) => within(val, start, end);
 
 const toSegmentsIndexed = pipe(
   mapObjIndexed((segments, key) =>
-    segments.map((segment) => [Number.parseInt(key), segment])
+    segments.map((segment) => [parseInt(key), segment])
   ),
   values,
   unnest
@@ -69,11 +68,12 @@ const mergeSegments = ([startA, endA], [startB, endB]) => [
   max(endA, endB),
 ];
 
-// This function expect the segment to be arranged such that
+// This function expects the segment to be arranged such that
 // start <= end
-const magnitudeOf = (segment) => {
+const magnitude = (segment) => {
   if (!segment) return 0;
   const [start, end] = segment;
+
   return end - start + 1;
 };
 
@@ -81,7 +81,7 @@ module.exports = {
   isHorizontalSegment,
   countUniqueNodes,
   withinSegment,
-  magnitudeOf,
+  magnitude,
   normalizeSegment,
   isOverlapping,
   mergeSegments,

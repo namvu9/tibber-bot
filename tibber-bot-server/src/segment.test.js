@@ -1,12 +1,12 @@
-const { countUniqueNodes, magnitudeOf } = require("./segment");
+const { countUniqueNodes, magnitude } = require("./segment");
 
 describe("magnitudeOf", () => {
   it("should handle single node segment", () => {
-    expect(magnitudeOf([0, 0])).toEqual(1);
+    expect(magnitude([0, 0])).toEqual(1);
   });
 
   it("should handle segments", () => {
-    expect(magnitudeOf([-1, 2])).toEqual(4);
+    expect(magnitude([-1, 2])).toEqual(4);
   });
 });
 

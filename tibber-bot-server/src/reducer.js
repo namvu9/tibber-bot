@@ -2,7 +2,7 @@ const { reduce, append, init, concat, last } = require("ramda");
 const {
   isHorizontalSegment,
   normalizeSegment,
-  magnitudeOf,
+  magnitude,
   isOverlapping,
   mergeSegments,
   startsBefore,
@@ -96,7 +96,7 @@ const storeVerticalSegment = (segment, state) => {
 
 const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
   !segments.length
-    ? [initialNodeCount + magnitudeOf(newSegment), [newSegment]]
+    ? [initialNodeCount + magnitude(newSegment), [newSegment]]
     : segments.reduce(
         ([nodeCount, rowAcc], segment, index) => {
           if (isOverlapping(newSegment, segment)) {
@@ -105,7 +105,7 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
 
             if (!isOverlapping(prevSegment, mergedSegment)) {
               return [
-                nodeCount + magnitudeOf(mergedSegment) - magnitudeOf(segment),
+                nodeCount + magnitude(mergedSegment) - magnitude(segment),
                 append(mergedSegment, rowAcc),
               ];
             }
@@ -117,9 +117,9 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
 
             return [
               nodeCount -
-                magnitudeOf(prevSegment) -
-                magnitudeOf(segment) +
-                magnitudeOf(twiceMergedSegment),
+                magnitude(prevSegment) -
+                magnitude(segment) +
+                magnitude(twiceMergedSegment),
               append(twiceMergedSegment, init(rowAcc)),
             ];
           }
@@ -127,15 +127,15 @@ const insertSegment = (newSegment, segments = [], initialNodeCount = 0) =>
           // no overlap
           return startsBefore(newSegment, segment)
             ? [
-                nodeCount + magnitudeOf(newSegment),
+                nodeCount + magnitude(newSegment),
                 concat(rowAcc, [newSegment, segment]),
               ]
             : isLastElement(index, segments)
             ? [
-                nodeCount + magnitudeOf(newSegment),
+                nodeCount + magnitude(newSegment),
                 concat(rowAcc, [segment, newSegment]),
               ]
-            : [nodeCount + magnitudeOf(segment), append(segment, rowAcc)];
+            : [nodeCount + magnitude(segment), append(segment, rowAcc)];
         },
         [initialNodeCount, []]
       );
