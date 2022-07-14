@@ -10,8 +10,6 @@ describe("applyCommands", () => {
 
     const res = applyCommands(start, commands);
     const exp = {
-      hSum: 5,
-      vSum: 0,
       hSegments: { 0: [[0, 4]] },
       vSegments: {},
       position: { x: 4, y: 0 },
@@ -34,8 +32,6 @@ describe("applyCommands", () => {
 
     const res = applyCommands(start, commands);
     const exp = {
-      hSum: 6,
-      vSum: 6,
       hSegments: { 0: [[0, 2]], 2: [[0, 2]] },
       vSegments: { 0: [[0, 2]], 2: [[0, 2]] },
       position: { x: 0, y: 0 },
@@ -59,8 +55,6 @@ describe("applyCommands", () => {
 
     const finalState = applyCommands(start, commands);
     const expectedFinalState = {
-      hSum: 6,
-      vSum: 6,
       hSegments: { 0: [[0, 2]], 2: [[0, 2]] },
       vSegments: { 0: [[0, 2]], 2: [[0, 2]] },
       position: { x: 0, y: 0 },
@@ -87,8 +81,6 @@ describe("applyCommands", () => {
 
     const res = applyCommands(start, commands);
     const expectedFinalState = {
-      hSum: 20,
-      vSum: 6,
       hSegments: { 0: [[0, 4]], 1: [[0, 4]], 2: [[0, 4]], 3: [[0, 4]] },
       vSegments: {
         0: [[1, 2]],
@@ -122,8 +114,6 @@ describe("applyCommands", () => {
 
     const res = applyCommands(start, commands);
     const expectedFinalState = {
-      hSum: 6,
-      vSum: 20,
       vSegments: { 0: [[0, 4]], 1: [[0, 4]], 2: [[0, 4]], 3: [[0, 4]] },
       hSegments: {
         0: [[1, 2]],
@@ -157,8 +147,6 @@ describe("applyCommands", () => {
 
     const res = applyCommands(start, commands);
     const expectedFinalState = {
-      hSum: 7,
-      vSum: 20,
       vSegments: {
         "-4": [[-4, 0]],
         "-3": [[-4, 0]],
@@ -190,7 +178,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 1,
       hSegments: { 0: [[start.x, end.x]] },
 
       vSegments: {},
@@ -207,7 +194,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 4,
       hSegments: { 0: [[start.x, end.x]] },
       vSegments: {},
     });
@@ -218,7 +204,6 @@ describe("insertSegment", () => {
     const end = { x: 0, y: 0 };
     const segment = [start, end];
     const state = {
-      hSum: 3,
       hSegments: {
         0: [[1, 3]],
       },
@@ -226,7 +211,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 6,
       hSegments: {
         0: [
           [start.x, end.x],
@@ -242,7 +226,6 @@ describe("insertSegment", () => {
     const end = { x: 0, y: 1 };
     const segment = [start, end];
     const state = {
-      hSum: 3,
       hSegments: {
         0: [[1, 3]],
       },
@@ -250,7 +233,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 6,
       hSegments: {
         0: [[1, 3]],
         1: [[start.x, end.x]],
@@ -264,7 +246,6 @@ describe("insertSegment", () => {
     const end = { x: 0, y: 1 };
     const segment = [start, end];
     const state = {
-      hSum: 6,
       hSegments: {
         0: [[1, 3]],
         1: [[1, 3]],
@@ -273,7 +254,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 9,
       hSegments: {
         0: [[1, 3]],
         1: [
@@ -290,7 +270,6 @@ describe("insertSegment", () => {
     const end = { x: 6, y: 0 };
     const segment = [start, end];
     const state = {
-      hSum: 3,
       hSegments: {
         0: [[1, 3]],
       },
@@ -298,7 +277,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 5,
       hSegments: {
         0: [
           [1, 3],
@@ -314,7 +292,6 @@ describe("insertSegment", () => {
     const end = { x: 1, y: 0 };
     const segment = [start, end];
     const state = {
-      hSum: 3,
       hSegments: {
         0: [[1, 3]],
       },
@@ -322,7 +299,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 5,
       hSegments: {
         0: [[-1, 3]],
       },
@@ -335,7 +311,6 @@ describe("insertSegment", () => {
     const end = { x: 4, y: 0 };
     const segment = [start, end];
     const state = {
-      hSum: 3,
       hSegments: {
         0: [[1, 3]],
       },
@@ -343,7 +318,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 4,
       hSegments: {
         0: [[1, 4]],
       },
@@ -356,7 +330,6 @@ describe("insertSegment", () => {
     const end = { x: 5, y: 0 };
     const segment = [start, end];
     const state = {
-      hSum: 5,
       hSegments: {
         0: [
           [1, 3],
@@ -367,7 +340,6 @@ describe("insertSegment", () => {
     };
 
     expect(storeSegment(segment, state)).toEqual({
-      hSum: 6,
       hSegments: {
         0: [[1, 6]],
       },
@@ -387,7 +359,6 @@ describe("insertSegment", () => {
     expect(storeSegment(segment, state)).toEqual({
       hSegments: {},
       vSegments: { 0: [[start.y, end.y]] },
-      vSum: 3,
     });
   });
 });

@@ -2,7 +2,6 @@ const { reduce, append, init, concat, last } = require("ramda");
 const {
   isHorizontalSegment,
   normalizeSegment,
-  magnitude,
   isOverlapping,
   mergeSegments,
   startsBefore,
@@ -15,8 +14,6 @@ const WEST = "west";
 const EAST = "east";
 
 const createExecutionState = (start) => ({
-  hSum: 0,
-  vSum: 0,
   hSegments: {},
   vSegments: {},
   position: start,
@@ -77,21 +74,13 @@ const getDirectionalState = (isHorizontal, state) =>
 
 const storeSegment = (segment, state) => {
   const isHorizontal = isHorizontalSegment(segment);
-  const { sum, sumKey, vectors, vectorsKey } = getDirectionalState(
-    isHorizontal,
-    state
-  );
+  const { vectors, vectorsKey } = getDirectionalState(isHorizontal, state);
   const [index, segmentVector] = getIndexedSegmentVector(segment, state);
 
-  const [newSum, newVector] = insertSegment(
-    normalizeSegment(segment),
-    segmentVector,
-    sum
-  );
+  const newVector = insertSegment(normalizeSegment(segment), segmentVector);
 
   return {
     ...state,
-    [sumKey]: newSum,
     [vectorsKey]: {
       ...vectors,
       [index]: newVector,
@@ -99,51 +88,30 @@ const storeSegment = (segment, state) => {
   };
 };
 
-const insertSegment = (newSegment, vector = [], initialNodeCount = 0) =>
+const insertSegment = (newSegment, vector = []) =>
   !vector.length
-    ? [initialNodeCount + magnitude(newSegment), [newSegment]]
-    : vector.reduce(
-        ([nodeCount, vectorAcc], segment, index) => {
-          if (isOverlapping(newSegment, segment)) {
-            const mergedSegment = mergeSegments(newSegment, segment);
-            const prevSegment = last(vectorAcc);
+    ? [newSegment]
+    : vector.reduce((vectorAcc, segment, index) => {
+        if (isOverlapping(newSegment, segment)) {
+          const mergedSegment = mergeSegments(newSegment, segment);
+          const prevSegment = last(vectorAcc);
 
-            if (!isOverlapping(prevSegment, mergedSegment)) {
-              return [
-                nodeCount + magnitude(mergedSegment) - magnitude(segment),
-                append(mergedSegment, vectorAcc),
-              ];
-            }
-
-            const twiceMergedSegment = mergeSegments(
-              prevSegment,
-              mergedSegment
-            );
-
-            return [
-              nodeCount -
-                magnitude(prevSegment) -
-                magnitude(segment) +
-                magnitude(twiceMergedSegment),
-              append(twiceMergedSegment, init(vectorAcc)),
-            ];
+          if (!isOverlapping(prevSegment, mergedSegment)) {
+            return append(mergedSegment, vectorAcc);
           }
 
-          // no overlap
-          return startsBefore(newSegment, segment)
-            ? [
-                nodeCount + magnitude(newSegment),
-                concat(vectorAcc, [newSegment, segment]),
-              ]
-            : isLastElement(index, vector)
-            ? [
-                nodeCount + magnitude(newSegment),
-                concat(vectorAcc, [segment, newSegment]),
-              ]
-            : [nodeCount + magnitude(segment), append(segment, vectorAcc)];
-        },
-        [initialNodeCount, []]
-      );
+          const twiceMergedSegment = mergeSegments(prevSegment, mergedSegment);
+
+          return append(twiceMergedSegment, init(vectorAcc));
+        }
+
+        // no overlap
+        return startsBefore(newSegment, segment)
+          ? concat(vectorAcc, [newSegment, segment])
+          : isLastElement(index, vector)
+          ? concat(vectorAcc, [segment, newSegment])
+          : append(segment, vectorAcc);
+      }, []);
 
 const isLastElement = (index, arr) => index === arr.length - 1;
 

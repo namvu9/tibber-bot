@@ -3,6 +3,8 @@ const {
   mapObjIndexed,
   values,
   unnest,
+  reduce,
+  sum,
   sortBy,
   prop,
   eqProps,
@@ -15,9 +17,16 @@ const {
 const countUniqueNodes = (state) => {
   const rows = toSegmentsIndexed(state.hSegments);
   const cols = toSegmentsIndexed(state.vSegments);
+
+  const vectorMagnitude = reduce((acc, segment) => acc + magnitude(segment), 0);
+
+  const totalMagnitude = pipe(mapObjIndexed(vectorMagnitude), values, sum);
+  const rowSum = totalMagnitude(state.hSegments);
+  const colSum = totalMagnitude(state.vSegments);
+
   const overlaps = cols.reduce(countOverlapsWith(rows), 0);
 
-  return state.hSum + state.vSum - overlaps;
+  return rowSum + colSum - overlaps;
 };
 
 const countOverlapsWith =
