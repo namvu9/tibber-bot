@@ -43,16 +43,10 @@ const getIndexedSegmentVector = (segment, state) => {
 const getDirectionalState = (isHorizontal, state) =>
   isHorizontal
     ? {
-        sum: state.hSum,
-        sumKey: "hSum",
-
         vectors: state.hSegments,
         vectorsKey: "hSegments",
       }
     : {
-        sum: state.vSum,
-        sumKey: "vSum",
-
         vectors: state.vSegments,
         vectorsKey: "vSegments",
       };
