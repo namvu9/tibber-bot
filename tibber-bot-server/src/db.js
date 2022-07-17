@@ -1,30 +1,30 @@
-const DB_TABLE_NAME = "executions";
-
 const createExecutionRecord = (commands, result, duration) => ({
   commands,
   result,
   duration,
 });
 
-const storeRecordQuery = (table, { commands, result, duration }) => `
-  INSERT INTO ${table}(timestamp, commands, result, duration) 
-  VALUES (CURRENT_TIMESTAMP, ${commands}, ${result}, ${duration})
+const storeRecordQuery = `
+  INSERT INTO executions(timestamp, commands, result, duration) 
+  VALUES (CURRENT_TIMESTAMP, $1, $2, $3)
   RETURNING id;
 `;
 
-const getRecordQuery = (table, id) => `
-  SELECT * FROM ${table} WHERE id=${id};
-`;
+const getRecordQuery = "SELECT * FROM executions WHERE id=$1";
 
 const createExecutionStore = (db) => {
   return {
-    put: async (record) => {
-      const result = await db.query(storeRecordQuery(DB_TABLE_NAME, record));
-      return result.rows[0].id;
+    put: async (commands, result, duration) => {
+      const queryResult = await db.query(storeRecordQuery, [
+        commands,
+        result,
+        duration,
+      ]);
+      return queryResult.rows[0].id;
     },
 
     get: async (id) => {
-      const result = await db.query(getRecordQuery(DB_TABLE_NAME, id));
+      const result = await db.query(getRecordQuery, [id]);
       return result.rows[0];
     },
   };
