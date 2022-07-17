@@ -1,16 +1,8 @@
-const createExecutionRecord = (commands, result, duration) => ({
-  commands,
-  result,
-  duration,
-});
-
 const storeRecordQuery = `
   INSERT INTO executions(timestamp, commands, result, duration) 
   VALUES (CURRENT_TIMESTAMP, $1, $2, $3)
-  RETURNING id;
+  RETURNING *;
 `;
-
-const getRecordQuery = "SELECT * FROM executions WHERE id=$1";
 
 const createExecutionStore = (db) => {
   return {
@@ -20,17 +12,9 @@ const createExecutionStore = (db) => {
         result,
         duration,
       ]);
-      return queryResult.rows[0].id;
-    },
-
-    get: async (id) => {
-      const result = await db.query(getRecordQuery, [id]);
-      return result.rows[0];
+      return queryResult.rows[0];
     },
   };
 };
 
-module.exports = {
-  createExecutionRecord,
-  createExecutionStore,
-};
+module.exports = { createExecutionStore };

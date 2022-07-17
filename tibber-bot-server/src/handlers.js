@@ -7,8 +7,7 @@ const executeCmdHandler = (executionStore) => async (req, res) => {
 
   const [duration, result] = timed(executeCommands(start, commands));
 
-  const recordId = await executionStore.put(commands.length, result, duration);
-  const record = await executionStore.get(recordId);
+  const record = await executionStore.put(commands.length, result, duration);
 
   res.json(record);
 };
